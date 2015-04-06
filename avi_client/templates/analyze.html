@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Automated Visual Inspection</title>
+		<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/bootstrap.min.css')}}">
+		<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/avi.css')}}">
+		<script type="text/javascript" src="{{url_for('static', filename='js/jquery-2.1.1.min.js')}}"></script>
+		<script type="text/javascript" src="{{url_for('static', filename='js/d3.min.js')}}"></script>
+		<script type="text/javascript" src="{{url_for('static', filename='js/nv.d3.min.js')}}"></script>
+		<script type="text/javascript" src="{{url_for('static', filename='js/avi.js')}}"></script>
+	</head>
+	<body>
+		<div class="container-fluid text-center">
+
+			<div class="row">
+				<h1>Automated Visual Inspection</h1>
+			</div>
+
+			<div class="row">
+				<div class="col-md-8">
+					<canvas width="{{canvas_width}}" height="{{canvas_height}}" id="image-canvas" data-image-id="{{image_id}}">
+					</canvas>
+				</div>
+				<div class="col-md-4 text-left">
+
+					<div class="row">
+						<div class="col-md-6">
+							<input type="button" value="upload"/>
+						</div>
+						<div class="col-md-6">
+							<input type="button" value="analyze"/>
+						</div>
+					</div>
+
+					<div class="row">
+						<br />
+						<div class="col-md-6 table-header">
+							Defect Type
+						</div>
+						<div class="col-md-6 table-header">
+							Probability
+						</div>
+					</div>
+
+					{% for defect in defects %}
+						<div class="row">
+							<div class="col-md-6">
+								{{defect.type}}
+							</div>
+							<div class="col-md-6">
+								{{defect.probability}}
+							</div>
+						</div>
+					{% endfor %}
+
+					<br />
+					<div class="row">
+						<div class="col-md-8">
+							<span class="table-header">Suggestion:</span>
+							<select id="suggested-defect-type">
+								{% for defect_type in defect_types %}
+									<option value="{{defect_type}}">{{defect_type}}</option>
+								{% endfor %}
+							</select>
+						</div>
+						<div class="col-md-4">
+							<input type="button" value="feedback" />
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+		</div>
+	</body>
+</html>
