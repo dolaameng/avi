@@ -18,22 +18,25 @@
 			</div>
 
 			<div class="row">
-				<div class="col-md-8">
+				<div class="col-md-8 text-center">
 					<canvas width="{{canvas_width}}" height="{{canvas_height}}" id="image-canvas" data-image-id="{{image_id}}">
 					</canvas>
 				</div>
 				<div class="col-md-4 text-left">
 
 					<div class="row">
-						<div class="col-md-6">
-							<input type="button" value="upload"/>
+						<div class="col-md-8">
+							<form id="upload-image" method="post" enctype="multipart/form-data" action="/upload">
+								<input name="image-file" type="file" id="file" value="choose image file">
+								<input type="submit" value="upload" id="upload-image-button">
+							</form>
 						</div>
-						<div class="col-md-6">
-							<input type="button" value="analyze"/>
+						<div class="col-md-4">
+							<input type="button" value="analyze" id="analyze-button"/>
 						</div>
 					</div>
 
-					<div class="row">
+					<div class="row" id="defect-header">
 						<br />
 						<div class="col-md-6 table-header">
 							Defect Type
@@ -42,17 +45,8 @@
 							Probability
 						</div>
 					</div>
-
-					{% for defect in defects %}
-						<div class="row">
-							<div class="col-md-6">
-								{{defect.type}}
-							</div>
-							<div class="col-md-6">
-								{{defect.probability}}
-							</div>
-						</div>
-					{% endfor %}
+					<div id="defects">
+					</div>
 
 					<br />
 					<div class="row">
@@ -65,7 +59,16 @@
 							</select>
 						</div>
 						<div class="col-md-4">
-							<input type="button" value="feedback" />
+							<input type="button" value="feedback" id="feedback-button"/>
+						</div>
+					</div>
+
+					<br />
+					<div class="row text-left">
+						<div class="col-md-4">
+						<div class="col-md-8">
+							<div class="row table-header"> Image Description </div>
+							<div class="row" id="image-description">{{image_description}}</div>
 						</div>
 					</div>
 
