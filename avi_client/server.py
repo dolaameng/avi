@@ -8,18 +8,22 @@ from os import path
 import os, json, uuid
 import matplotlib.pyplot as plt 
 
+from defect_classifier import AVIClassifier
+
 
 app = Flask(__name__)
 
 canvas_width = 600
 canvas_height = 600
 
-DEFECT_TYPES = ["scuff", "scratch", "no-defect"]
+avi_classifier = AVIClassifier()
+
+DEFECT_TYPES = list(avi_classifier.class_names()) + ["no-defect"]
 UPLOAD_FOLDER = "static/upload/"
 DATA_STORE = "static/data/"
 IMAGE_PATCH_STORE = "static/data/patches"
 META_STORE = "static/data/patches.json"
-META_HEADER = ["image_id", "patch_id", "row", "col", "nr", "nc", "defect"]
+META_HEADER = ["image_id", "patch_id", "row", "col", "nr", "nc", "defect", "byhuman"]
 if not path.exists(UPLOAD_FOLDER):
 	os.makedirs(UPLOAD_FOLDER)
 if not path.exists(DATA_STORE):
@@ -30,6 +34,9 @@ if not path.exists(META_STORE):
 	meta = {}
 else:
 	meta = json.load(open(META_STORE))
+
+
+
 
 
 @app.route('/upload', methods=["POST"])
@@ -70,12 +77,15 @@ def analyze_roi():
 	io.imsave(path.join(IMAGE_PATCH_STORE, patch_id), img_patch)
 	##plt.imshow(img_patch, cmap = plt.cm.gray)
 	##plt.show()
-	defect = "scuff"
-	meta[patch_id] = dict(zip(META_HEADER, [image_id, patch_id, row, col, nr, nc, defect]))
-	json.dump(meta, open(META_STORE, "w"))
+	defects = avi_classifier.predict(img_patch)
+
+	## now auto save anymore, now always handled by feedback function
+	# defect = defects[0][0]
+	# meta[patch_id] = dict(zip(META_HEADER, [image_id, patch_id, row, col, nr, nc, defect, False]))
+	# json.dump(meta, open(META_STORE, "w"))
 
 	
-	return json.dumps({"defects": [{"type": "scratch", "probability": 0.5}]
+	return json.dumps({"defects": [{"type": defect[0], "probability": defect[1]} for defect in defects]
 						, "patch_id": patch_id});
 
 @app.route("/patches", methods=["GET"])
@@ -88,8 +98,13 @@ def view_patches():
 def feedback():
 	patch_id = request.form["patch_id"]
 	defect = request.form["defect_type"]
-	print "feedback:", patch_id, defect
-	meta[patch_id]["defect"] = defect 
+	image_id = request.form["image_id"]
+	row = int(request.form["row"])
+	col = int(request.form["col"])
+	nr = int(request.form["nr"])
+	nc = int(request.form["nc"])
+	byhuman = request.form["byhuman"]
+	meta[patch_id] = dict(zip(META_HEADER, [image_id, patch_id, row, col, nr, nc, defect, byhuman]))
 	json.dump(meta, open(META_STORE, "w"))
 	return json.dumps({"patch_id": patch_id, "defect_type": defect})
 

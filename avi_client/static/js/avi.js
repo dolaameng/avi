@@ -24,6 +24,7 @@ var avi = {
 		avi.image_canvas.addEventListener("mousemove", avi.image_canvas_mousemove, false);
 		document.querySelector("#analyze-button").addEventListener("click", avi.anaylize_button_click, false);
 		document.querySelector("#feedback-button").addEventListener("click", avi.feedback_button_click, false);
+		document.querySelector("#confirm-button").addEventListener("click", avi.confirm_button_click, false);
 
 		// draw - images and rectangle, if any
 		if (avi.image_url != "") {
@@ -124,17 +125,59 @@ var avi = {
 			console.log(defect.type, defect.probability);
 			html += "<div class=\"row\"> <div class=\"col-md-6 text-left\">" + defect.type + "</div> <div class=\"col-md-6\">" + defect.probability + "</div> </div>";
 		}
-		$("#defects").data("patch-id", patch_id).html(html);
+		$("#defects").data("patch-id", patch_id).data("prediction", defects[0].type).html(html);
 		console.log("patch_id:", $("#defects").data("patch-id"));
 	}
 
 	, feedback_button_click: function (event) {
 		event.preventDefault();
 		console.log("feedback button clicked");
+		var wratio = avi.image.width / avi.image_canvas.width;
+		var hratio = avi.image.height / avi.image_canvas.height;
+		var roi_x = Math.min(avi.roi_startpoint.x, avi.roi_endpoint.x);
+		var roi_y = Math.min(avi.roi_startpoint.y, avi.roi_endpoint.y);
+		var roi_w = Math.abs(avi.roi_startpoint.x - avi.roi_endpoint.x);
+		var roi_h = Math.abs(avi.roi_startpoint.y - avi.roi_endpoint.y);
 		var data = {
 			patch_id: $("#defects").data("patch-id")
 			, defect_type: $("#suggested-defect-type option:selected" ).text()
-		}
+			, image_id: avi.image_id
+			, row: parseInt(roi_y * hratio)
+			, col: parseInt(roi_x * wratio)
+			, nr: parseInt(roi_h * hratio)
+			, nc: parseInt(roi_w * wratio)
+			, byhuman: true
+		};
+		$.ajax({
+			type: "POST"
+			, url: "/feedback"
+			, data: data
+			, dataType: "json"
+			, success: function (data) {
+				console.log("successful feedback: ", data);
+			}
+		});
+	}
+	, confirm_button_click: function (event) {
+		event.preventDefault();
+		console.log("confirm button clicked");
+		var wratio = avi.image.width / avi.image_canvas.width;
+		var hratio = avi.image.height / avi.image_canvas.height;
+		var roi_x = Math.min(avi.roi_startpoint.x, avi.roi_endpoint.x);
+		var roi_y = Math.min(avi.roi_startpoint.y, avi.roi_endpoint.y);
+		var roi_w = Math.abs(avi.roi_startpoint.x - avi.roi_endpoint.x);
+		var roi_h = Math.abs(avi.roi_startpoint.y - avi.roi_endpoint.y);
+		var data = {
+			patch_id: $("#defects").data("patch-id")
+			, defect_type: $("#defects").data("prediction")
+			, image_id: avi.image_id
+			, row: parseInt(roi_y * hratio)
+			, col: parseInt(roi_x * wratio)
+			, nr: parseInt(roi_h * hratio)
+			, nc: parseInt(roi_w * wratio)
+			, byhuman: false
+		};
+		console.log("confirm", data);
 		$.ajax({
 			type: "POST"
 			, url: "/feedback"

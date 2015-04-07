@@ -50,7 +50,10 @@
 
 					<br />
 					<div class="row">
-						<div class="col-md-8">
+						<div class="col-md-3">
+							<input type="button" value="confirm" id="confirm-button" />
+						</div>
+						<div class="col-md-6">
 							<span class="table-header">Suggestion:</span>
 							<select id="suggested-defect-type">
 								{% for defect_type in defect_types %}
@@ -58,7 +61,7 @@
 								{% endfor %}
 							</select>
 						</div>
-						<div class="col-md-4">
+						<div class="col-md-3">
 							<input type="button" value="feedback" id="feedback-button"/>
 						</div>
 					</div>
