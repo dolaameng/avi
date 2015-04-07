@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Automated Visual Inspection</title>
+		<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/bootstrap.min.css')}}">
+		<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/avi.css')}}">
+		<script type="text/javascript" src="{{url_for('static', filename='js/jquery-2.1.1.min.js')}}"></script>
+		<script type="text/javascript" src="{{url_for('static', filename='js/d3.min.js')}}"></script>
+		<script type="text/javascript" src="{{url_for('static', filename='js/nv.d3.min.js')}}"></script>
+		<script type="text/javascript" src="{{url_for('static', filename='js/avi.js')}}"></script>
+	</head>
+	<body>
+		<div class="container-fluid text-center">
+
+			<div class="row">
+				<h1>Automated Visual Inspection</h1>
+			</div>
+
+			<div class="row">
+				<div class="col-md-8 text-center">
+					<canvas width="{{canvas_width}}" height="{{canvas_height}}" id="image-canvas" data-image-id="{{image_id}}">
+					</canvas>
+				</div>
+				<div class="col-md-4 text-left">
+
+					<div class="row">
+						<div class="col-md-8">
+							<form id="upload-image" method="post" enctype="multipart/form-data" action="/upload">
+								<input name="image-file" type="file" id="file" value="choose image file">
+								<input type="submit" value="upload" id="upload-image-button">
+							</form>
+						</div>
+						<div class="col-md-4">
+							<input type="button" value="analyze" id="analyze-button"/>
+						</div>
+					</div>
+
+					<div class="row" id="defect-header">
+						<br />
+						<div class="col-md-6 table-header">
+							Defect Type
+						</div>
+						<div class="col-md-6 table-header">
+							Probability
+						</div>
+					</div>
+					<div id="defects">
+					</div>
+
+					<br />
+					<div class="row">
+						<div class="col-md-3">
+							<input type="button" value="confirm" id="confirm-button" />
+						</div>
+						<div class="col-md-6">
+							<span class="table-header">Suggestion:</span>
+							<select id="suggested-defect-type">
+								{% for defect_type in defect_types %}
+									<option value="{{defect_type}}">{{defect_type}}</option>
+								{% endfor %}
+							</select>
+						</div>
+						<div class="col-md-3">
+							<input type="button" value="feedback" id="feedback-button"/>
+						</div>
+					</div>
+
+					<br />
+					<div class="row text-left">
+						<div class="col-md-4">
+						<div class="col-md-8">
+							<div class="row table-header"> Image Description </div>
+							<div class="row" id="image-description">{{image_description}}</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+		</div>
+	</body>
+</html>

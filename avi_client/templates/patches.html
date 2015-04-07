@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" >
+		<title>Extracted Patches</title>
+	</head>
+	<body>
+		<h1>Extracted Patches</h1>
+		<table style = "width:100%">
+			<tr>
+				{% for header in headers %}
+					<th> {{header}} </th>
+				{% endfor %}
+			</tr>
+			{% for patch in patches %}
+			<tr>
+					<td><a href="static/data/patches/{{patch[1]}}"> <img src="static/data/patches/{{patch[1]}}" height="30" width="30"> </a> </td>
+				{% for field in patch %}
+					<td>{{field}}</td>
+				{% endfor %}
+			</tr>
+			{% endfor %}
+		</table>
+	</body>
+</html>
