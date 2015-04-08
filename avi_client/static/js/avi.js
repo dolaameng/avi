@@ -25,6 +25,9 @@ var avi = {
 		document.querySelector("#analyze-button").addEventListener("click", avi.anaylize_button_click, false);
 		document.querySelector("#feedback-button").addEventListener("click", avi.feedback_button_click, false);
 		document.querySelector("#confirm-button").addEventListener("click", avi.confirm_button_click, false);
+		document.querySelector("#thumb-down-button").addEventListener("click", avi.thumb_down_button_click, false);
+		// document.querySelector(".btn-file :file").addEventListener("click", avi.thumb_down_button_click, false);
+
 
 		// draw - images and rectangle, if any
 		if (avi.image_url != "") {
@@ -74,7 +77,7 @@ var avi = {
 			avi.roi_endpoint = avi.windowToCanvas(avi.image_canvas, event.clientX, event.clientY);
 			avi.draw_image_canvas();
 		}
-		console.log("mousemove");
+		// console.log("mousemove");
 		
 	}
 	, windowToCanvas: function (canvas, x, y) {
@@ -119,14 +122,18 @@ var avi = {
 		var defects = data.defects 
 		var patch_id = data.patch_id
 		console.log(defects);
-		var html = "";
+
+		var html = "<thead> <tr> <th>Defect type</th> <th>Probability</th> <tbody>";
 		for (var i = 0; i < defects.length; ++i) {
 			var defect = defects[i];
 			console.log(defect.type, defect.probability);
-			html += "<div class=\"row\"> <div class=\"col-md-6 text-left\">" + defect.type + "</div> <div class=\"col-md-6\">" + defect.probability + "</div> </div>";
+			html += "<tr> <td>" + defect.type + "</td> <td>" + defect.probability + "</td> </tr>" 
 		}
+		html += "</tbody> </table>";
 		$("#defects").data("patch-id", patch_id).data("prediction", defects[0].type).html(html);
 		console.log("patch_id:", $("#defects").data("patch-id"));
+		$("#thumbs").show();
+
 	}
 
 	, feedback_button_click: function (event) {
@@ -152,13 +159,15 @@ var avi = {
 			type: "POST"
 			, url: "/feedback"
 			, data: data
-			, dataType: "json"
+			// , dataType: "application/json"
 			, success: function (data) {
 				console.log("successful feedback: ", data);
-			}
+				$("#feedback-success").show();
+			} 
 		});
 	}
-	, confirm_button_click: function (event) {
+
+	, confirm_button_click: function (event) { 
 		event.preventDefault();
 		console.log("confirm button clicked");
 		var wratio = avi.image.width / avi.image_canvas.width;
@@ -185,11 +194,41 @@ var avi = {
 			, dataType: "json"
 			, success: function (data) {
 				console.log("successful feedback: ", data);
+				$("#feedback-success").show();
+				$("#thumb-down-button").toggleClass("disabled");
+				$("#confirm-button").toggleClass("disabled");
 			}
 		});
+	}
+
+	, thumb_down_button_click: function (event) {
+		event.preventDefault();
+		$("#feedback-div").show();
+		$("#confirm-button").toggleClass("disabled");
+		$("#thumb-down-button").toggleClass("disabled");
 	}
 };
 
 $(function () {
 	avi.init();
+    $('.btn-file :file').on('fileselect', function(event, numFiles, label) {
+    	var input = $(this).parents('.input-group').find(':text'),
+            log = numFiles > 1 ? numFiles + ' files selected' : label;
+        
+        if( input.length ) {
+            input.val(log);
+        } else {
+            if( log ) alert(log);
+        }
+    console.log(numFiles);
+    console.log(label);
+    });
 });
+
+$(document).on('change', '.btn-file :file', function() {
+    var input = $(this),
+        numFiles = input.get(0).files ? input.get(0).files.length : 1,
+        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+    input.trigger('fileselect', [numFiles, label]);
+});
+

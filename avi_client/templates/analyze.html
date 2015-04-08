@@ -1,83 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Automated Visual Inspection</title>
-		<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/bootstrap.min.css')}}">
-		<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/avi.css')}}">
-		<script type="text/javascript" src="{{url_for('static', filename='js/jquery-2.1.1.min.js')}}"></script>
-		<script type="text/javascript" src="{{url_for('static', filename='js/d3.min.js')}}"></script>
-		<script type="text/javascript" src="{{url_for('static', filename='js/nv.d3.min.js')}}"></script>
-		<script type="text/javascript" src="{{url_for('static', filename='js/avi.js')}}"></script>
-	</head>
-	<body>
-		<div class="container-fluid text-center">
+<head>
+	<meta charset="utf-8">
+	<title>Automated Visual Inspection</title>
+	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/bootstrap.min.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/avi.css')}}">
+	<script type="text/javascript" src="{{url_for('static', filename='js/jquery-2.1.1.min.js')}}"></script>
+	<script type="text/javascript" src="{{url_for('static', filename='js/d3.min.js')}}"></script>
+	<script type="text/javascript" src="{{url_for('static', filename='js/nv.d3.min.js')}}"></script>
+	<script type="text/javascript" src="{{url_for('static', filename='js/avi.js')}}"></script>
+</head>
+<body>
+	<div class="container-fluid text-center">
 
-			<div class="row">
-				<h1>Automated Visual Inspection</h1>
+		<div class="row">
+			<h1>Automated Visual Inspection</h1>
+		</div>
+
+		<hr>
+		<div class="row">
+			<div class="col-xs-8 text-center">
+				<canvas width="{{canvas_width}}" height="{{canvas_height}}" id="image-canvas" data-image-id="{{image_id}}">
+					<!-- <canvas id="image-canvas" data-image-id="{{image_id}}" class="img-responsive"> -->
+				</canvas>
 			</div>
+			<div class="col-xs-4 text-left">
 
-			<div class="row">
-				<div class="col-md-8 text-center">
-					<canvas width="{{canvas_width}}" height="{{canvas_height}}" id="image-canvas" data-image-id="{{image_id}}">
-					</canvas>
+				<div class="row">
+					<form id="upload-image" method="post" enctype="multipart/form-data" action="/upload">
+						<div class="input-group">
+							<span class="input-group-btn">
+								<span class="btn btn-success btn-file"> <i class="glyphicon glyphicon-folder-open"></i>
+									<span>Select Image&hellip;</span>
+									<input name="image-file" type="file" id="file" class="upload">
+								</span>
+							</span>
+							<input type="text" class="form-control" readonly>
+						</div>
+						<input type="submit" value="Upload" id="upload-image-button" class="btn btn-default pull-right">
+					</form>
 				</div>
-				<div class="col-md-4 text-left">
+				<div class="row table-header"> Image Description </div>
+				<div class="row" id="image-description">{{image_description}}</div>
 
+				<hr>
+				<div class="row">
+					<!-- <div class="col-xs-4"> -->
+					<input class="btn btn-primary btn-block" type="button" value="Analyze" id="analyze-button"/>
+					<!-- </div> -->
+				</div>
+
+				<br>
+				<div class="row tbl_container">
+					<table class="table table-striped table-bordered" id="defects">
+					</table>
+					
+
+					<div class="row" hidden="true" id="thumbs">
+						<div class="col-xs-4 col-xs-offset-4 text-right">
+							Is the analysis correct?
+						</div>
+						<div class="col-xs-4 text-right">
+							<button type="button" class="btn btn-success" id="confirm-button">
+								<span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
+							</button>
+							<button type="button" class="btn btn-danger" id="thumb-down-button">
+								<span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span>
+							</button>
+						</div>
+					</div>
+				</div>
+
+
+				<hr>
+				<div class="row" hidden="true" id="feedback-div">
+						<span class="table-header">Your Suggestion:</span>
 					<div class="row">
-						<div class="col-md-8">
-							<form id="upload-image" method="post" enctype="multipart/form-data" action="/upload">
-								<input name="image-file" type="file" id="file" value="choose image file">
-								<input type="submit" value="upload" id="upload-image-button">
-							</form>
-						</div>
-						<div class="col-md-4">
-							<input type="button" value="analyze" id="analyze-button"/>
-						</div>
-					</div>
-
-					<div class="row" id="defect-header">
-						<br />
-						<div class="col-md-6 table-header">
-							Defect Type
-						</div>
-						<div class="col-md-6 table-header">
-							Probability
-						</div>
-					</div>
-					<div id="defects">
-					</div>
-
-					<br />
-					<div class="row">
-						<div class="col-md-3">
-							<input type="button" value="confirm" id="confirm-button" />
-						</div>
-						<div class="col-md-6">
-							<span class="table-header">Suggestion:</span>
-							<select id="suggested-defect-type">
+						<div class="col-xs-8 dropdown">
+							<select class="form-control" id="suggested-defect-type">
 								{% for defect_type in defect_types %}
-									<option value="{{defect_type}}">{{defect_type}}</option>
+								<option value="{{defect_type}}">{{defect_type}}</option>
 								{% endfor %}
 							</select>
 						</div>
-						<div class="col-md-3">
-							<input type="button" value="feedback" id="feedback-button"/>
+						<div class="col-xs-4">
+							<input class="btn btn-primary btn-block" type="button" value="Feedback" id="feedback-button"/>
 						</div>
 					</div>
+				</div> 
 
-					<br />
-					<div class="row text-left">
-						<div class="col-md-4">
-						<div class="col-md-8">
-							<div class="row table-header"> Image Description </div>
-							<div class="row" id="image-description">{{image_description}}</div>
-						</div>
+				<br>
+				<div class="row">
+					<div class="alert alert-success alert-dismissible" role="alert" id="feedback-success" hidden="true">Your feedback has been successfully recorded!
 					</div>
 
 				</div>
-			</div>
 
+			</div>
 		</div>
-	</body>
+
+	</div> 
+</body>
 </html>
