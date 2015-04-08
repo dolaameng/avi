@@ -96,6 +96,7 @@ def view_patches():
 
 @app.route("/feedback", methods=["POST"])
 def feedback():
+	print request
 	patch_id = request.form["patch_id"]
 	defect = request.form["defect_type"]
 	image_id = request.form["image_id"]
@@ -110,4 +111,5 @@ def feedback():
 
 
 if __name__ == '__main__':
-	app.run(debug = True, port = 5001)
+	# app.run(debug = True, port = 5001)
+	app.run(debug = True, port = 5001, host = "0.0.0.0")
