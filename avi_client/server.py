@@ -6,7 +6,8 @@ from skimage import io, img_as_ubyte
 import numpy as np 
 from os import path 
 import os, json, uuid
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
+from datetime import datetime 
 
 from defect_classifier import AVIClassifier
 
@@ -18,12 +19,12 @@ canvas_height = 600
 
 avi_classifier = AVIClassifier()
 
-DEFECT_TYPES = list(avi_classifier.class_names()) + ["no-defect"]
+DEFECT_TYPES = list(avi_classifier.class_names()) + ["custom type"]
 UPLOAD_FOLDER = "static/upload/"
 DATA_STORE = "static/data/"
 IMAGE_PATCH_STORE = "static/data/patches"
 META_STORE = "static/data/patches.json"
-META_HEADER = ["image_id", "patch_id", "row", "col", "nr", "nc", "defect", "byhuman"]
+META_HEADER = ["time", "image_id", "patch_id", "row", "col", "nr", "nc", "defect", "byhuman"]
 if not path.exists(UPLOAD_FOLDER):
 	os.makedirs(UPLOAD_FOLDER)
 if not path.exists(DATA_STORE):
@@ -85,18 +86,18 @@ def analyze_roi():
 	# json.dump(meta, open(META_STORE, "w"))
 
 	
-	return json.dumps({"defects": [{"type": defect[0], "probability": defect[1]} for defect in defects]
+	return json.dumps({"defects": [{"type": defect[0], "probability": defect[1]} for defect in defects[:3]]
 						, "patch_id": patch_id});
 
 @app.route("/patches", methods=["GET"])
 def view_patches():
 	headers = ["patch"] + META_HEADER
-	patches = [[row[f] for f in META_HEADER] for row in meta.values()]
+	patches = [[row[f] for f in META_HEADER] for row in sorted(meta.values(),key=lambda x:x['time'])]
 	return render_template("patches.html", headers = headers, patches = patches)
 
 @app.route("/feedback", methods=["POST"])
 def feedback():
-	print request
+	time = str(datetime.now())[:19]
 	patch_id = request.form["patch_id"]
 	defect = request.form["defect_type"]
 	image_id = request.form["image_id"]
@@ -105,7 +106,7 @@ def feedback():
 	nr = int(request.form["nr"])
 	nc = int(request.form["nc"])
 	byhuman = request.form["byhuman"]
-	meta[patch_id] = dict(zip(META_HEADER, [image_id, patch_id, row, col, nr, nc, defect, byhuman]))
+	meta[patch_id] = dict(zip(META_HEADER, [time, image_id, patch_id, row, col, nr, nc, defect, byhuman]))
 	json.dump(meta, open(META_STORE, "w"))
 	return json.dumps({"patch_id": patch_id, "defect_type": defect})
 

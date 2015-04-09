@@ -26,6 +26,7 @@ var avi = {
 		document.querySelector("#feedback-button").addEventListener("click", avi.feedback_button_click, false);
 		document.querySelector("#confirm-button").addEventListener("click", avi.confirm_button_click, false);
 		document.querySelector("#thumb-down-button").addEventListener("click", avi.thumb_down_button_click, false);
+		document.querySelector("#suggested-defect-type").addEventListener("change", avi.input_custom_type, false);
 		// document.querySelector(".btn-file :file").addEventListener("click", avi.thumb_down_button_click, false);
 
 
@@ -115,6 +116,10 @@ var avi = {
 			, dataType: "json"
 			, success: function (data) {
 				avi.update_defects(data);
+				// $("#confirm-button").removeClass("disabled");
+				// $("#thumb-down-button").removeClass("disabled");
+				$("#feedback-success").hide();
+				$("#feedback-div").hide();
 			}
 		});
 	}
@@ -124,6 +129,7 @@ var avi = {
 		console.log(defects);
 
 		var html = "<thead> <tr> <th>Defect type</th> <th>Probability</th> <tbody>";
+
 		for (var i = 0; i < defects.length; ++i) {
 			var defect = defects[i];
 			console.log(defect.type, defect.probability);
@@ -131,9 +137,19 @@ var avi = {
 		}
 		html += "</tbody> </table>";
 		$("#defects").data("patch-id", patch_id).data("prediction", defects[0].type).html(html);
+		$("#defects>tbody>tr:first").addClass("text-success");
 		console.log("patch_id:", $("#defects").data("patch-id"));
 		$("#thumbs").show();
 
+	}
+
+	, input_custom_type: function(event) {
+		event.preventDefault();
+		if ($("#suggested-defect-type option:selected" ).text() === "custom type"){
+					console.log("custom");
+
+			$("#custom-type").show();
+		} 
 	}
 
 	, feedback_button_click: function (event) {
@@ -145,9 +161,17 @@ var avi = {
 		var roi_y = Math.min(avi.roi_startpoint.y, avi.roi_endpoint.y);
 		var roi_w = Math.abs(avi.roi_startpoint.x - avi.roi_endpoint.x);
 		var roi_h = Math.abs(avi.roi_startpoint.y - avi.roi_endpoint.y);
+		var defect = "";
+		if ($("#suggested-defect-type option:selected" ).text() === "custom type"){
+			defect = $("#custom-type").val();
+		}
+		else {
+			defect = $("#suggested-defect-type option:selected" ).text();
+		}
+
 		var data = {
 			patch_id: $("#defects").data("patch-id")
-			, defect_type: $("#suggested-defect-type option:selected" ).text()
+			, defect_type: defect
 			, image_id: avi.image_id
 			, row: parseInt(roi_y * hratio)
 			, col: parseInt(roi_x * wratio)
@@ -162,7 +186,10 @@ var avi = {
 			// , dataType: "application/json"
 			, success: function (data) {
 				console.log("successful feedback: ", data);
-				$("#feedback-success").show();
+				$("#feedback-success").alert();
+				$("#feedback-success").fadeTo(2000, 500).slideUp(500, function(){
+					$("feedback-success").alert('close');
+				});
 			} 
 		});
 	}
@@ -194,9 +221,13 @@ var avi = {
 			, dataType: "json"
 			, success: function (data) {
 				console.log("successful feedback: ", data);
-				$("#feedback-success").show();
-				$("#thumb-down-button").toggleClass("disabled");
-				$("#confirm-button").toggleClass("disabled");
+				// $("#feedback-success").show();
+				$("#feedback-success").alert();
+				$("#feedback-success").fadeTo(2000, 500).slideUp(500, function(){
+					$("feedback-success").alert('close');
+				});
+				// $("#thumb-down-button").addClass("disabled");
+				// $("#confirm-button").addClass("disabled");
 			}
 		});
 	}
@@ -204,8 +235,8 @@ var avi = {
 	, thumb_down_button_click: function (event) {
 		event.preventDefault();
 		$("#feedback-div").show();
-		$("#confirm-button").toggleClass("disabled");
-		$("#thumb-down-button").toggleClass("disabled");
+		// $("#confirm-button").addClass("disabled");
+		// $("#thumb-down-button").addClass("disabled");
 	}
 };
 
